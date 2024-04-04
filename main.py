@@ -24,7 +24,7 @@ app = FastAPI()
 
 # ---------------------------Contacts end points--------------------------------
 # Create a contact
-@app.post("/contacts/")
+@app.post("/contacts/create")
 def create_contact(contact: Contact):
     sql = "INSERT INTO Contact (contactName, phoneNo, email) VALUES (%s, %s, %s)"
     val =  (contact.name, contact.phoneNo, contact.email)
@@ -66,7 +66,7 @@ def delete_contact(contact_id: int):
 # Create a booking
 @app.post("/bookings/")
 def create_booking(booking: Booking):
-    sql = "INSERT INTO bookings (contactID) VALUES (%s)"
+    sql = "INSERT INTO Booking (contactID) VALUES (%s)"
     val =  (booking.contactID,)
     cursor.execute(sql, val)
     db.commit()
@@ -75,21 +75,21 @@ def create_booking(booking: Booking):
 # Read bookings operations
 @app.get("/bookings/")
 def read_bookings():
-    cursor.execute("SELECT * FROM bookings")
+    cursor.execute("SELECT * FROM Booking")
     bookings = cursor.fetchall()
     return bookings
 
 # Read a booking
 @app.get("/bookings/{booking_id}")
 def read_booking(booking_id: int):
-    cursor.execute("SELECT * FROM bookings WHERE bookingID = %s", (booking_id,))
+    cursor.execute("SELECT * FROM Booking WHERE bookingID = %s", (booking_id,))
     booking = cursor.fetchone()
     return booking
 
 # Delete a booking
 @app.delete("/bookings/delete/{booking_id}")
 def delete_booking(booking_id: int):
-    cursor.execute("DELETE FROM bookings WHERE bookingID = %s", (booking_id,))
+    cursor.execute("DELETE FROM Booking WHERE bookingID = %s", (booking_id,))
     db.commit()
     return {"message": "Booking deleted successfully"}
 
