@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import mysql.connector
 
@@ -22,6 +23,15 @@ cursor = db.cursor()
 
 app = FastAPI()
 
+# CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # ---------------------------Contacts end points--------------------------------
 # Create a contact
 @app.post("/contacts/create")
@@ -30,6 +40,7 @@ def create_contact(contact: Contact):
     val =  (contact.name, contact.phoneNo, contact.email)
     cursor.execute(sql, val)
     db.commit()
+    db.close()
     return {"name": contact.name, "phoneNo": contact.phoneNo, "email": contact.email}
 
 # Update a contact
@@ -39,6 +50,7 @@ def update_contact(contact_id: int, contact: Contact):
     val =  (contact.name, contact.phoneNo, contact.email, contact_id)
     cursor.execute(sql, val)
     db.commit()
+    db.close()
     return {"name": contact.name, "phoneNo": contact.phoneNo, "email": contact.email}
 
 # Read contacts operations
@@ -46,12 +58,14 @@ def update_contact(contact_id: int, contact: Contact):
 def read_contacts():
     cursor.execute("SELECT * FROM Contact")
     contacts = cursor.fetchall()
+    db.close()
     return contacts
 # Read a contact
 @app.get("/contacts/{contact_id}")
 def read_contact(contact_id: int):
     cursor.execute("SELECT * FROM Contact WHERE contactID = %s", (contact_id,))
     contact = cursor.fetchone()
+    db.close()
     return contact
 
 # Delete a contact
@@ -59,17 +73,19 @@ def read_contact(contact_id: int):
 def delete_contact(contact_id: int):
     cursor.execute("DELETE FROM Contact WHERE contactID = %s", (contact_id,))
     db.commit()
+    db.close()
     return {"message": "Contact deleted successfully"}
 
 # ---------------------------End of Contacts end points--------------------------
 # ---------------------------Bookings end points---------------------------------
 # Create a booking
-@app.post("/bookings/")
+@app.post("/bookings/create")
 def create_booking(booking: Booking):
     sql = "INSERT INTO Booking (contactID) VALUES (%s)"
     val =  (booking.contactID,)
     cursor.execute(sql, val)
     db.commit()
+    db.close()
     return {"contactID": booking.contactID}
 
 # Read bookings operations
@@ -77,6 +93,7 @@ def create_booking(booking: Booking):
 def read_bookings():
     cursor.execute("SELECT * FROM Booking")
     bookings = cursor.fetchall()
+    db.close()
     return bookings
 
 # Read a booking
@@ -84,6 +101,7 @@ def read_bookings():
 def read_booking(booking_id: int):
     cursor.execute("SELECT * FROM Booking WHERE bookingID = %s", (booking_id,))
     booking = cursor.fetchone()
+    db.close()
     return booking
 
 # Delete a booking
@@ -91,9 +109,11 @@ def read_booking(booking_id: int):
 def delete_booking(booking_id: int):
     cursor.execute("DELETE FROM Booking WHERE bookingID = %s", (booking_id,))
     db.commit()
+    db.close()
     return {"message": "Booking deleted successfully"}
 
 # Root end point
 @app.get("/")
 def read_root():
+    db.close()
     return {"Hello": "World"}

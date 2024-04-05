@@ -1,23 +1,41 @@
-import logo from './logo.svg';
+import { useEffect, useState } from 'react';
 import './App.css';
+import AvailabilityTable from './componants/AvailabilityTable';
+import { fetchAppointments } from './scripts/fetchData';
 
 function App() {
+
+  const [contacts, setContacts] = useState([]);
+
+  useEffect(() => {
+    async function fetchData() {
+      const data = await fetchAppointments();
+      setContacts(data);
+    }
+    fetchData();
+  }
+  , [contacts]);
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <nav>
+        <ul>
+          <li>
+            <p>Login</p>
+          </li>
+          <li>
+            <p>Register</p>
+          </li>
+          <li>
+            <p>Dashboard</p>
+          </li>
+        </ul>
+      </nav>
+      
+      <AvailabilityTable />
+      
+      <p>{contacts}</p>
+      
     </div>
   );
 }
